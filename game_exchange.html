@@ -437,10 +437,12 @@ async function doSubmit() {
   btn.innerHTML = '<div class="spin"></div>rolling...';
 
   if (!configured()) {
+    const sentTitle = sel.title;
     setTimeout(() => {
       reset();
       btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>見知らぬ誰かに送る';
       startCooldown();
+      document.getElementById('tweet-btn').onclick = () => tweetSent(sentTitle);
       showReceived({ title: 'Hollow Knight', url: 'https://store.steampowered.com/app/367520/', image: steamImg(367520), comment: 'Supabaseを設定すると実際の投稿が届きます' });
     }, 600);
     return;
@@ -449,10 +451,13 @@ async function doSubmit() {
   await sbFetch('/rest/v1/posts', { method: 'POST', body: JSON.stringify({ title: sel.title, url: sel.url, image: sel.image, comment: cmt || null }) });
   const all = await sbFetch('/rest/v1/posts?select=*&order=created_at.desc&limit=200');
   const others = (all || []).filter(p => !(p.title === sel.title && p.comment === (cmt || null)));
+  const sentTitle = sel.title;
   reset();
   btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>見知らぬ誰かに送る';
   startCooldown();
   loadPosts();
+  const tweetBtn = document.getElementById('tweet-btn');
+  tweetBtn.onclick = () => tweetSent(sentTitle);
   if (others.length > 0) {
     showReceived(others[Math.floor(Math.random() * others.length)]);
   } else {
@@ -470,9 +475,8 @@ function reset() {
 
 function loadPosts() {}
 
-function tweetSent() {
+function tweetSent(title) {
   const pageUrl = 'https://kutinawa.github.io/gameswap-/game_exchange.html';
-  const title = document.getElementById('recv-title').textContent || 'あるゲーム';
   const text = `「${title}」を見知らぬ誰かに送った。\n\n#GameSwap\n${pageUrl}`;
   window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
 }
