@@ -156,12 +156,6 @@ textarea{resize:vertical;min-height:80px;margin-bottom:4px}
   <div class="admin-link" onclick="showPage('page-admin')">管理者ログイン</div>
 
   <footer style="margin-top:2.5rem;padding:1.5rem 0 2rem;border-top:1px solid var(--bd)">
-    <div style="text-align:center;margin-bottom:1.25rem">
-      <button onclick="shareApp()" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;color:var(--tx);font-size:13px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:background .15s" onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background='var(--s2)'" id="share-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
-        このページをシェア
-      </button>
-    </div>
     <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px">
       <div style="flex:1;height:1px;background:var(--bd)"></div>
       <span style="font-size:10px;color:#334;letter-spacing:.1em">MADE BY KUTINAWA</span>
@@ -199,6 +193,10 @@ textarea{resize:vertical;min-height:80px;margin-bottom:4px}
         <button class="btn-store" id="recv-store-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
           store page →
+        </button>
+        <button class="btn-back" id="tweet-btn" onclick="tweetSent()" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;background:transparent;border:1px solid var(--bd2);border-radius:10px;color:var(--mu);font-size:13px;cursor:pointer;width:100%;font-family:'Noto Sans JP',sans-serif;transition:all .15s">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          Xでシェア
         </button>
         <button class="btn-back" onclick="goPost()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -472,11 +470,11 @@ function reset() {
 
 function loadPosts() {}
 
-function shareApp() {
+function tweetSent() {
   const pageUrl = 'https://kutinawa.github.io/gameswap-/game_exchange.html';
-  const text = `見知らぬ誰かにゲームのおすすめを送った。どこかの誰かに届くといいな。\n\n#GameSwap\n${pageUrl}`;
-  const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
-  window.open(twitterUrl, '_blank', 'noopener,noreferrer');
+  const title = document.getElementById('recv-title').textContent || 'あるゲーム';
+  const text = `「${title}」を見知らぬ誰かに送った。\n\n#GameSwap\n${pageUrl}`;
+  window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
 }
 
 // ===== 管理者機能 =====
