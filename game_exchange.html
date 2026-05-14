@@ -153,14 +153,31 @@ textarea{resize:vertical;min-height:80px;margin-bottom:4px}
   </button>
   <div class="cooldown-bar" id="cooldown-bar"><div class="cooldown-fill" id="cooldown-fill" style="width:100%"></div></div>
 
-  <hr class="div"/>
-  <div class="ph">
-    <span class="ph-t">recent drops</span>
-    <span class="ph-c" id="pcnt">0件</span>
-  </div>
-  <div id="posts"></div>
-
   <div class="admin-link" onclick="showPage('page-admin')">管理者ログイン</div>
+
+  <footer style="margin-top:2.5rem;padding:1.5rem 0 2rem;border-top:1px solid var(--bd)">
+    <div style="text-align:center;margin-bottom:1.25rem">
+      <button onclick="shareApp()" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;color:var(--tx);font-size:13px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:background .15s" onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background='var(--s2)'" id="share-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+        このページをシェア
+      </button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px">
+      <div style="flex:1;height:1px;background:var(--bd)"></div>
+      <span style="font-size:10px;color:#334;letter-spacing:.1em">MADE BY KUTINAWA</span>
+      <div style="flex:1;height:1px;background:var(--bd)"></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:16px">
+      <a href="https://note.com/kutinawa" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--s2);border:1px solid var(--bd2);border-radius:7px;font-size:12px;color:var(--tx);text-decoration:none;transition:background .15s" onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background='var(--s2)'">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        note
+      </a>
+      <a href="https://x.com/Kutinawa_VGamer" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--s2);border:1px solid var(--bd2);border-radius:7px;font-size:12px;color:var(--tx);text-decoration:none;transition:background .15s" onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background='var(--s2)'">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        X / Twitter
+      </a>
+    </div>
+  </footer>
 </div>
 </div>
 
@@ -453,21 +470,21 @@ function reset() {
   sel = null; clearHero();
 }
 
-async function loadPosts() {
-  if (!configured()) {
-    document.getElementById('pcnt').textContent = '—';
-    document.getElementById('posts').innerHTML = `<div class="empty">Supabaseを設定すると投稿が表示されます</div>`;
-    return;
+function loadPosts() {}
+
+function shareApp() {
+  const url = window.location.href;
+  const btn = document.getElementById('share-btn');
+  if (navigator.share) {
+    navigator.share({ title: 'GameSwap', text: 'おすすめゲームを送ると、見知らぬ誰かのおすすめが届く', url });
+  } else {
+    navigator.clipboard.writeText(url).then(() => {
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> コピーしました';
+      setTimeout(() => {
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg> このページをシェア';
+      }, 2000);
+    });
   }
-  const posts = await sbFetch('/rest/v1/posts?select=*&order=created_at.desc&limit=50');
-  document.getElementById('pcnt').textContent = `${(posts || []).length}件`;
-  const c = document.getElementById('posts');
-  if (!posts || posts.length === 0) { c.innerHTML = `<div class="empty">no drops yet. be the first.</div>`; return; }
-  c.innerHTML = posts.map(p => {
-    const th = p.image ? `<div class="pt-wrap" style="background-image:url('${p.image}')"></div>` : `<div class="pt-wrap"></div>`;
-    return `<div class="prow" id="prow-${p.id}">${th}<div style="flex:1;min-width:0"><div class="ptitle">${esc(p.title)}</div><div class="pcmt">${esc(p.comment || '—')}</div></div><button class="del-btn" onclick="deletePost('${p.id}')">削除</button></div>`;
-  }).join('');
-  if (isAdmin) document.getElementById('posts').classList.add('admin-mode');
 }
 
 // ===== 管理者機能 =====
