@@ -202,15 +202,16 @@ textarea{resize:vertical;min-height:80px;margin-bottom:4px}
 
 <script>
 // ===== 設定（ここを書き換える） =====
-const SUPABASE_URL = 'https://voeimzpwqeewjkgancuh.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_V6zOPsmdEDyIt3IVW1c-vA_C4Jd5Fi2';
-const ADMIN_PASSWORD = '-+hs3)@zk_?EV/*'; // 任意のパスワードに変更
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const ADMIN_PASSWORD = 'YOUR_ADMIN_PASSWORD';
+const PROXY = 'https://steam-proxy.kutinawa-channel.workers.dev';
 // =====================================
 
 const COOLDOWN_MS = 30000; // 連続投稿の間隔（ミリ秒）
 const MAX_COMMENT = 200;
 
-const configured = () => SUPABASE_URL !== 'https://voeimzpwqeewjkgancuh.supabase.co';
+const configured = () => SUPABASE_URL !== 'YOUR_SUPABASE_URL';
 let sel = null;
 let lastPostTime = 0;
 let cooldownTimer = null;
@@ -273,6 +274,7 @@ function startCooldown() {
   }, 100);
 }
 
+
 async function doSearch() {
   const q = document.getElementById('query').value.trim();
   const err = document.getElementById('serr');
@@ -286,40 +288,17 @@ async function doSearch() {
   sel = null; clearHero();
   let items = [];
   try {
-    const r = await fetch(`https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(q)}&l=japanese&cc=JP`);
+    const r = await fetch(`${PROXY}?q=${encodeURIComponent(q)}`);
     const d = await r.json();
     items = (d.items || []).slice(0, 8);
-    if (items.length === 0) {
-      const r2 = await fetch(`https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(q)}&l=english&cc=US`);
-      const d2 = await r2.json();
-      items = (d2.items || []).slice(0, 8);
-    }
   } catch(e) { items = []; }
-  if (items.length === 0) items = knownGames(q);
-  renderResults(items.map(g => ({ appid: g.id || g.appid, name: g.name })));
+  if (items.length === 0) {
+    area.innerHTML = `<div class="rbox"><div class="empty">見つかりませんでした。別のキーワードで試してみてください。</div></div>`;
+  } else {
+    renderResults(items.map(g => ({ appid: g.id || g.appid, name: g.name })));
+  }
   btn.disabled = false;
   btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>検索';
-}
-
-function knownGames(q) {
-  const db = [
-    {appid:367520,name:'Hollow Knight'},{appid:1145360,name:'Hades'},
-    {appid:413150,name:'Stardew Valley'},{appid:1086940,name:"Baldur's Gate 3"},
-    {appid:1245620,name:'Elden Ring'},{appid:1091500,name:'Cyberpunk 2077'},
-    {appid:814380,name:'Sekiro: Shadows Die Twice'},{appid:292030,name:'The Witcher 3'},
-    {appid:1817190,name:'Lies of P'},{appid:2329550,name:'Armored Core VI'},
-    {appid:1062090,name:'Valheim'},{appid:975370,name:'Dyson Sphere Program'},
-    {appid:504230,name:'Celeste'},{appid:1422740,name:'Vampire Survivors'},
-    {appid:1367820,name:'Inscryption'},{appid:391540,name:'Undertale'},
-    {appid:632360,name:'Risk of Rain 2'},{appid:2050650,name:'Hogwarts Legacy'},
-    {appid:1593500,name:'God of War'},{appid:1888930,name:'The Last of Us Part I'},
-    {appid:1172470,name:'Apex Legends'},{appid:570,name:'Dota 2'},
-    {appid:730,name:'Counter-Strike 2'},{appid:1659420,name:'Coral Island'},
-    {appid:1263950,name:'Ghostrunner'},{appid:2358720,name:'Black Myth: Wukong'},
-    {appid:1174180,name:'Red Dead Redemption 2'},{appid:578080,name:'PUBG: Battlegrounds'},
-  ];
-  const lq = q.toLowerCase();
-  return db.filter(g => g.name.toLowerCase().includes(lq));
 }
 
 function renderResults(items) {
